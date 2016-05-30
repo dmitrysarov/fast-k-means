@@ -7,7 +7,7 @@ def dist(x,y):
     return np.sum((x-y)**2)
 
 def centers_initiation(points,number_of_centers):
-    # initialization of clusters centers
+    # initialization of clusters centers as most distante points
     dist_per_point = np.empty((0, 0), int)
     dist_for_point = 0
     index_of_deleted_point=0
