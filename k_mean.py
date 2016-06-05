@@ -122,14 +122,40 @@ def glob_yingyang(points, centers):
         # print 'filtered point ', 100*(points.shape[0]- point_after_filter.shape[0])/points.shape[0], '%'
         centers = np.copy(new_centers)
     return clusters
+# For group and local filtering yingyang
+def creat_groups(centers, number_of_groups):
+#  for clusters centers defining groups as kmean clustering operation (5 iterations, as in article). returne cluster (group) number for each center 
+    group_centers = centers[np.array(random.sample(range(centers.shape[0]), number_of_groups))]
+    center_cluster = get_cluster_number(centers, group_centers)
+#    clusters_centers_shift = 1
+    new_group_centers = np.zeros(centers.shape)
+    counter = 0
+    while counter != 5:
+        counter += 1
+        for i in xrange(centers.shape[0]):
+            new_group_centers[i] = np.mean(centers[:][center_cluster == i], axis=0)
+#        clusters_centers_shift = dist(new_centers, centers)
+        center_cluster = get_cluster_number(centers, new_group_centers)
+        group_centers = np.copy(new_group_centers)
+    return center_cluster
+def group_max_shift(old_centers,new_centers, center_cluster, number_of_groups):
+#  return max  cluster shift per group. Should exclude center of cluster for witch point belongs
+    centers_shift = dist(new_centers,old_centers)
+    max_group_shift = np.zeros([1 number_of_groups])
+    for i in xrange(number_of_groups):
+        max_group_shift[i] = np.max(centers_shift[center_cluster == i])
+    return max_group_shift
+        
+      
 def goup_local_yingyang(points,centers,number_of_groups):
-
-
+    center_cluster = creat_groups(centers, number_of_groups)
+    
+# testing
 def tree_dementional_space_example():
     np.random.seed(1024)
     points = np.random.multivariate_normal([0,0,0],[[1,0,0],[0,1,0],[0,0,1]],5000)
     time = np.zeros([2,50])
-    for i in xrange(50):
+    for i in xrange(1):
         # centers = centers_initiation(points, 2)
         centers = points[np.array(random.sample(range(points.shape[0]), 2))] # for random center initiation
         print centers
@@ -157,7 +183,7 @@ def tree_dementional_space_example():
 
 def two_dementional_space_example():
     np.random.seed(1024)
-    points = np.random.normal(0, 1, [5000, 2])
+    points = np.random.normal(0, 1, [100, 2])
     # points = np.append(points, np.random.normal(2, 1, [5000, 2]), axis=0)
     # centers = centers_initiation(points, 2)
     centers = points[np.array(random.sample(range(points.shape[0]), 2))] # for random center initiation
@@ -179,8 +205,8 @@ def two_dementional_space_example():
         plt.plot(points[b == i, 0], points[b == i, 1], '.')
     plt.show()
 def main():
-    tree_dementional_space_example()
-    # two_dementional_space_example()
+#    tree_dementional_space_example()
+     two_dementional_space_example()
 
 if __name__ == "__main__":
     main()
