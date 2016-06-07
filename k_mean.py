@@ -142,9 +142,8 @@ def creat_groups(centers, number_of_groups):
         # group_centers = np.copy(new_group_centers)
     return center_cluster
 
-def group_max_shift(old_centers,new_centers, center_cluster, number_of_groups):
+def group_max_shift(centers_shift, center_cluster, number_of_groups):
 #  return max  cluster shift per group. exclude center of cluster for witch point belongs
-    centers_shift = dist(new_centers,old_centers)
     max_group_shift = np.zeros(number_of_groups)
     for i in xrange(number_of_groups):
         max_group_shift[i] = np.max(centers_shift[center_cluster == i])
@@ -169,11 +168,11 @@ def group_local_yingyang(points,centers,number_of_groups):
     point_to_center_dist = dist(points,np.array([centers[i] for i in clusters]))
     for i in xrange(centers.shape[0]):
         new_centers[i] = np.mean(points[clusters == i],axis=0)
-    grp_max_shft = group_max_shift(centers, new_centers, center_cluster, number_of_groups)
-    center_shift = dist(new_centers,centers)
-    point_center_shift = np.array([center_shift[i] for i in clusters])
-    passed_groups = np.array([low_bounds[:,i] - grp_max_shft[i] < point_to_center_dist + point_center_shift for i in xrange(number_of_groups)]).transpose()
-    passed_groups = np.array([np.nonzero(passed_groups[i]) for i in xrange(points.shape[0])])
+    centers_shift = dist(new_centers,centers)
+    grp_max_shft = group_max_shift(centers_shift, center_cluster, number_of_groups)
+    point_center_shift = np.array([centers_shift[i] for i in clusters])
+    passed_groups = np.vstack([low_bounds[:,i] - grp_max_shft[i] <= point_to_center_dist + point_center_shift for i in xrange(number_of_groups)]).transpose()
+    passed_groups = np.concatenate([[np.nonzero(passed_groups[i])[0] for i in xrange(points.shape[0])]],axis=0)
     print passed_groups
 
 
@@ -236,7 +235,7 @@ def two_dementional_space_example():
 def main():
 #    tree_dementional_space_example()
 #      two_dementional_space_example()
-
+    np.random.seed(1023)
     points = np.random.normal(0, 1, [10, 2])
     centers = points[np.array(random.sample(range(points.shape[0]), 4))]
     number_of_groups = 2
